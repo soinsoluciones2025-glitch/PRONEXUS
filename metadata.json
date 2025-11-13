@@ -1,0 +1,8 @@
+{
+  "name": "Prospect Nexus AI",
+  "description": "Prospect Nexus AI es tu nexo de inteligencia de ventas. Analiza tu oferta, descubre nichos de mercado, encuentra clientes cualificados con análisis profundos y genera guiones de contacto personalizados para cerrar más ventas.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}
