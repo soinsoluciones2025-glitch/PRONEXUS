@@ -34,7 +34,7 @@ const safelyParseJson = <T>(jsonString: string, context: string): T => {
 
 // --- Geocoding ---
 
-export const reverseGeocode = async (lat: number, lon: number): Promise<{ localidad: string, provincia: string, pais: string }> => {
+export const reverseGeocode = async (lat: number, lon: number): Promise<{ locationName: string }> => {
     try {
         const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=es`;
         const response = await fetch(url, {
@@ -54,16 +54,28 @@ export const reverseGeocode = async (lat: number, lon: number): Promise<{ locali
         }
 
         const address = data.address;
-        const localidad = address.city || address.town || address.village || address.suburb || 'Ubicación desconocida';
-        const provincia = address.state || 'Provincia desconocida';
-        const pais = address.country || 'País desconocido';
+        const localidad = address.city || address.town || address.village || address.suburb;
+        const provincia = address.state;
+        const pais = address.country;
 
-        return { localidad, provincia, pais };
+        const parts: string[] = [];
+        if (localidad) parts.push(localidad);
+        if (provincia) parts.push(provincia);
+        if (parts.length < 2 && pais && !parts.includes(pais)) parts.push(pais);
+
+        const locationName = parts.join(', ');
+        
+        if (!locationName) {
+            throw new Error("No se pudo determinar un nombre de ubicación.");
+        }
+
+        return { locationName };
     } catch (error: any) {
         console.error("Reverse geocoding with OpenStreetMap failed:", error);
         throw new Error("No se pudo obtener el nombre de la ubicación desde las coordenadas a través de OpenStreetMap.");
     }
 };
+
 
 // --- Search Flow ---
 

@@ -63,9 +63,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
           const { latitude, longitude } = position.coords;
           onGetCurrentLocation({ latitude, longitude });
           try {
-            const { localidad, provincia } = await reverseGeocode(latitude, longitude);
-            setSearchArea({ location: `${localidad}, ${provincia}`, useUserLocation: true, coordinates: { latitude, longitude } });
-            speak(`Ubicación encontrada: ${localidad}. Ahora puedes iniciar la búsqueda.`);
+            const { locationName } = await reverseGeocode(latitude, longitude);
+            setSearchArea({ location: locationName, useUserLocation: true, coordinates: { latitude, longitude } });
+            speak(`Ubicación encontrada: ${locationName}. Ahora puedes iniciar la búsqueda.`);
           } catch (error: any) {
             console.error(error);
             setSearchArea({ location: `Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}`, useUserLocation: true, coordinates: { latitude, longitude } });
