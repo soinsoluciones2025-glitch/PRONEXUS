@@ -15,13 +15,13 @@ import { ArrowTopRightOnSquareIcon } from './icons/ArrowTopRightOnSquareIcon';
 interface SettingsProps {
   user: User;
   onUpdateUser: (updates: Partial<User>) => Promise<void>;
-  onClose: () => void; // This prop is used directly
+  onClose: () => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClose }) => { // Marked onClose as unused locally
+const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose }) => {
   const [name, setName] = useState(user.name);
   const [whatsAppNumber, setWhatsAppNumber] = useState(user.whatsAppNumber || '');
-  const [userCVInfo, setUserCVInfo] = useState<UserCVInfo>(user.userCVInfo ?? {}); // Ensure initialization
+  const [userCVInfo, setUserCVInfo] = useState<UserCVInfo>(user.userCVInfo ?? {});
   const [apiKey, setApiKey] = useState(user.apiKey || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,31 +36,30 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClo
   const handleSave = async () => {
     setIsSaving(true);
     setSaveSuccess(false);
+    // FIX: Send empty strings instead of undefined for empty fields, as Firestore does not allow undefined in updates.
     const updates: Partial<User> = {
       name,
-      whatsAppNumber: whatsAppNumber.trim() || undefined, // Store as undefined if empty
+      whatsAppNumber: whatsAppNumber.trim(),
       userCVInfo,
-      apiKey: apiKey.trim() || undefined,
+      apiKey: apiKey.trim(),
     };
     try {
       await onUpdateUser(updates);
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
+      tts.speak("Ajustes guardados con éxito.");
+      setTimeout(() => {
+        onClose(); // Close modal after successful save
+      }, 1500);
     } catch (error) {
       console.error("Error saving settings:", error);
       alert("Error al guardar los ajustes.");
-    } finally {
-      setIsSaving(false);
+      setIsSaving(false); // Re-enable button on error
     }
   };
   
   // Debounced update for TTS settings to avoid excessive re-renders (if TTS settings were saved to DB)
-  // Currently, TTS settings are saved to localStorage in useTTS hook itself, so this useEffect is not strictly needed for saving.
-  // It's kept here as a placeholder for potential future DB saving.
-  useEffect(() => { // This useEffect is actually used
+  useEffect(() => { 
     const handler = setTimeout(() => {
-        // Example: if you wanted to save TTS settings to user profile in DB:
-        // onUpdateUser({ ttsSettings: { volume: tts.volume, rate: tts.rate, pitch: tts.pitch, selectedVoiceURI: tts.selectedVoiceURI } });
     }, 500);
 
     return () => {
@@ -181,7 +180,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClo
 
       {/* Save Button */}
       <div className="pt-6 flex justify-end items-center gap-4">
-        {saveSuccess && <span className="text-green-600 text-sm">Guardado con éxito!</span>}
+        {saveSuccess && <span className="text-green-600 dark:text-green-400 text-sm animate-fade-in-fast">Guardado con éxito!</span>}
         <button onClick={handleSave} disabled={isSaving} className="px-6 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-700 disabled:opacity-50">
           {isSaving ? 'Guardando...' : 'Guardar Cambios'}
         </button>
