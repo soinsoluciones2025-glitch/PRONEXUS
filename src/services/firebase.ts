@@ -1,12 +1,9 @@
-// FIX: Changed import to use firebase/compat/app for initialization
-// This resolves the error "Module 'firebase/app' has no exported member 'initializeApp'"
-// which can occur in some environments or with certain dependency version conflicts.
-// The v9 modular API used in the rest of the app is compatible with this initialization method.
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import "firebase/compat/firestore";
-import "firebase/compat/storage";
 
+
+
+// FIX: Changed to a namespace import for `firebase/app` to resolve an issue where `initializeApp`
+// was not found as a named export. This can be caused by module resolution inconsistencies.
+import * as firebaseApp from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, increment, serverTimestamp } from "firebase/firestore";
 import type { FieldValue, Timestamp } from "firebase/firestore";
@@ -27,10 +24,11 @@ const firebaseConfig = {
   appId: (import.meta as any).env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase using compat library
-const app = firebase.initializeApp(firebaseConfig);
+// Initialize Firebase using the v10 modular API
+// FIX: Use the namespace import to call initializeApp.
+const app = firebaseApp.initializeApp(firebaseConfig);
 
-// Get service instances using v9 modular API, which can work with a compat-initialized app
+// Get service instances
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
