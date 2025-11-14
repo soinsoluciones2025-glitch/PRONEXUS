@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react'; // Removed unused useEffect
+import React, { useState, useContext, useEffect } from 'react';
 import type { User, UserCVInfo } from '../types';
 import { TTSContext } from '../contexts/TTSContext'; 
 import { ToggleSwitch } from './ToggleSwitch';
@@ -6,7 +6,11 @@ import { UserCircleIcon } from './icons/UserCircleIcon';
 import { IdentificationIcon } from './icons/IdentificationIcon';
 import { SpeakerWaveIcon } from './icons/SpeakerWaveIcon';
 import { LanguageIcon } from './icons/LanguageIcon';
-// Removed WhatsappIcon as it's not used directly in this component
+import { KeyIcon } from './icons/KeyIcon';
+import { EyeIcon } from './icons/EyeIcon';
+import { EyeSlashIcon } from './icons/EyeSlashIcon';
+import { ArrowTopRightOnSquareIcon } from './icons/ArrowTopRightOnSquareIcon';
+
 
 interface SettingsProps {
   user: User;
@@ -18,6 +22,8 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClo
   const [name, setName] = useState(user.name);
   const [whatsAppNumber, setWhatsAppNumber] = useState(user.whatsAppNumber || '');
   const [userCVInfo, setUserCVInfo] = useState<UserCVInfo>(user.userCVInfo ?? {}); // Ensure initialization
+  const [apiKey, setApiKey] = useState(user.apiKey || '');
+  const [showApiKey, setShowApiKey] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const tts = useContext(TTSContext);
@@ -34,6 +40,7 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClo
       name,
       whatsAppNumber: whatsAppNumber.trim() || undefined, // Store as undefined if empty
       userCVInfo,
+      apiKey: apiKey.trim() || undefined,
     };
     try {
       await onUpdateUser(updates);
@@ -63,6 +70,46 @@ const Settings: React.FC<SettingsProps> = ({ user, onUpdateUser, onClose: _onClo
 
   return (
     <div className="p-6 space-y-8">
+      {/* API Key Section */}
+      <section>
+        <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"><KeyIcon className="w-6 h-6"/> Clave de API de Google AI</h3>
+        <div className="mt-4 p-4 bg-slate-100 dark:bg-gray-900/50 rounded-lg border border-slate-200 dark:border-gray-700 space-y-3">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+                Tu clave personal de API es necesaria para todas las funciones de inteligencia artificial. Se guarda de forma segura y nunca se comparte.
+            </p>
+            <div>
+                <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tu Clave de API</label>
+                <div className="relative mt-1">
+                    <input 
+                        type={showApiKey ? 'text' : 'password'} 
+                        id="api-key" 
+                        value={apiKey} 
+                        onChange={(e) => setApiKey(e.target.value)} 
+                        placeholder="Ingresa tu clave de API aquí"
+                        className="w-full p-2 pr-10 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <button 
+                        type="button"
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                        title={showApiKey ? "Ocultar clave" : "Mostrar clave"}
+                    >
+                        {showApiKey ? <EyeSlashIcon className="w-5 h-5"/> : <EyeIcon className="w-5 h-5"/>}
+                    </button>
+                </div>
+            </div>
+            <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-cyan-700 bg-cyan-100 hover:bg-cyan-200 dark:text-cyan-200 dark:bg-cyan-800/50 dark:hover:bg-cyan-800"
+            >
+                Obtener una Clave de API en Google AI Studio
+                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            </a>
+        </div>
+      </section>
+
       {/* Profile Section */}
       <section>
         <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2"><UserCircleIcon className="w-6 h-6"/> Perfil de Usuario</h3>
